@@ -245,6 +245,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 [[package]]
 name = "components"
 version = "0.1.0"
+dependencies = [
+ "yew",
+]
 
 [[package]]
 name = "console_error_panic_hook"
@@ -885,6 +888,10 @@ checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 [[package]]
 name = "pages"
 version = "0.1.0"
+dependencies = [
+ "components",
+ "yew",
+]
 
 [[package]]
 name = "parking_lot"
@@ -1051,6 +1058,9 @@ checksum = "afab94fb28594581f62d981211a9a4d53cc8130bbcbbb89a0440d9b8e81a7746"
 [[package]]
 name = "router"
 version = "0.1.0"
+dependencies = [
+ "yew-router",
+]
 
 [[package]]
 name = "rustc-demangle"

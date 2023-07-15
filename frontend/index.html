@@ -10,11 +10,18 @@
     <link data-trunk rel="copy-file" href="sw.js" />
     <link data-trunk rel="copy-dir" href="assets" />
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dosis&display=swap"
+      rel="stylesheet"
+    />
+
     <title>Clock</title>
   </head>
 
-  <body class="h-screen">
-    loading...
+  <body class="h-screen bg-[#000000] text-white flex items-center text-center">
+    <div class="flex-1 text-gray-400 text-3xl">Loading...</div>
 
     <script>
       if ("serviceWorker" in navigator) {

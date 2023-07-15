@@ -1,7 +1,11 @@
 module.exports = {
   content: ["index.html", "./**/*.rs"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        dosis: ["Dosis", "sans-serif"],
+      },
+    },
   },
   plugins: [],
 };
