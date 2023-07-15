@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "frontend",
+    "frontend/components",
+    "frontend/pages",
+    "frontend/router",
+    "frontend/stores",
+    "server",
+    "server/api",
+    "server/service",
+]
