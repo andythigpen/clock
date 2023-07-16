@@ -61,7 +61,6 @@ pub fn clock() -> Html {
             move |_| {
                 let win = window().unwrap();
                 let callback = Closure::<dyn Fn()>::wrap(Box::new(move || {
-                    info!("callback");
                     now.set(Date::new_0());
                 }));
                 let _ = win.set_interval_with_callback_and_timeout_and_arguments(
