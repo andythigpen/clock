@@ -80,7 +80,7 @@ pub fn clock() -> Html {
             <div class="text-8xl">
                 {formatted_date(&*now)}
             </div>
-            <div class="text-[20rem] leading-[20rem] font-dosis">
+            <div class="text-[20rem] leading-[20rem]">
                 {formatted_time(&*now)}
             </div>
         </div>

@@ -12,7 +12,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        dosis: ["Dosis", "sans-serif"],
+        oswald: ["Oswald", "sans-serif"],
       },
       keyframes: {
         gradient: {
