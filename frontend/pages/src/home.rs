@@ -1,4 +1,4 @@
-use components::{Clock, WeatherCurrent, WeatherForecast};
+use components::*;
 use yew::prelude::*;
 
 #[function_component(Home)]
@@ -7,7 +7,8 @@ pub fn home() -> Html {
         <div class="bg-gradient-45 from-darkbg-900 via-darkbg-800 to-darkbg-900 flex items-center justify-center h-screen w-screen animate-gradient bg-[size:400%_400%]">
             <Clock />
             // <WeatherCurrent />
-            <WeatherForecast />
+            // <WeatherForecast />
+            <WeatherHumidity />
         </div>
     }
 }
