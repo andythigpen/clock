@@ -10,7 +10,8 @@ pub fn home() -> Html {
             // <WeatherForecast />
             // <WeatherHumidity />
             // <TaskReminder />
-            <CalendarReminder />
+            // <CalendarReminder />
+            <Alert />
         </div>
     }
 }
