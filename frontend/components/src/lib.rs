@@ -1,9 +1,11 @@
+mod calendar_reminder;
 mod clock;
 mod task_reminder;
 mod weather_current;
 mod weather_forecast;
 mod weather_humidity;
 
+pub use calendar_reminder::*;
 pub use clock::*;
 pub use task_reminder::*;
 pub use weather_current::*;
