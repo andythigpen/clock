@@ -15,7 +15,7 @@ pub fn home() -> Html {
         "w-screen",
         "animate-gradient",
         "bg-[size:400%_400%]",
-        "p-8",
+        "p-6",
         "gap-16"
     );
     html! {

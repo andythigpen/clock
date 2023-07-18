@@ -1,7 +1,5 @@
-use js_sys::{Array, Date};
-use log::info;
-use wasm_bindgen::prelude::*;
-use web_sys::window;
+use gloo_timers::callback::Interval;
+use js_sys::Date;
 use yew::prelude::*;
 
 fn short_day(day: u32) -> &'static str {
@@ -59,23 +57,19 @@ pub fn clock() -> Html {
         {
             let now = now.clone();
             move |_| {
-                let win = window().unwrap();
-                let callback = Closure::<dyn Fn()>::wrap(Box::new(move || {
+                let interval = Interval::new(1000, move || {
                     now.set(Date::new_0());
-                }));
-                let _ = win.set_interval_with_callback_and_timeout_and_arguments(
-                    callback.as_ref().dyn_ref().unwrap(),
-                    1000,
-                    &Array::new(),
-                );
-                || drop(callback)
+                });
+                || {
+                    interval.cancel();
+                }
             }
         },
         (),
     );
 
     html! {
-        <div class="flex flex-col">
+        <div class="flex flex-col min-w-[40%]">
             <div class="text-8xl">
                 {formatted_date(&*now)}
             </div>

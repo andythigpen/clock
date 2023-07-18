@@ -8,7 +8,7 @@ module.exports = {
       colors: {
         darkbg: {
           800: "#0e002c",
-          900: "#050012",
+          900: "#000000",
         },
       },
       fontFamily: {

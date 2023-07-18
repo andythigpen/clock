@@ -1,7 +1,5 @@
-use gloo_timers::callback::Timeout;
-use js_sys::Array;
-use wasm_bindgen::prelude::*;
-use web_sys::{window, Element};
+use gloo_timers::callback::{Interval, Timeout};
+use web_sys::Element;
 use yew::prelude::*;
 
 #[derive(PartialEq, Properties)]
@@ -14,7 +12,7 @@ pub fn carousel(props: &Props) -> Html {
     let child = use_state(|| props.children.iter().next());
     let children_iter = use_mut_ref(|| props.children.clone().into_iter().cycle());
     let node = use_node_ref();
-    let classes = classes!("flex", "flex-1", "transition", "duration-1000");
+    let classes = classes!("flex", "flex-1", "transition", "duration-700");
 
     use_effect_with_deps(
         {
@@ -23,7 +21,7 @@ pub fn carousel(props: &Props) -> Html {
             let node = node.clone();
             let classes = classes.clone();
             move |_| {
-                let callback = Closure::<dyn Fn()>::wrap(Box::new(move || {
+                let interval = Interval::new(10000, move || {
                     if let Some(elem) = node.cast::<Element>() {
                         let mut hidden_classes = classes.clone();
                         hidden_classes.push("opacity-0");
@@ -32,20 +30,16 @@ pub fn carousel(props: &Props) -> Html {
                         let classes = classes.clone();
                         let children_iter = children_iter.clone();
                         let child = child.clone();
-                        let timeout = Timeout::new(1000, move || {
+                        let timeout = Timeout::new(700, move || {
                             child.set((*children_iter).borrow_mut().next());
                             elem.set_class_name(&classes.to_string());
                         });
                         timeout.forget();
                     }
-                }));
-                let win = window().unwrap();
-                let _ = win.set_interval_with_callback_and_timeout_and_arguments(
-                    callback.as_ref().dyn_ref().unwrap(),
-                    5000, // TODO: configurable
-                    &Array::new(),
-                );
-                || drop(callback)
+                });
+                || {
+                    interval.cancel();
+                }
             }
         },
         (),
