@@ -8,6 +8,7 @@ pub fn home() -> Html {
         "from-darkbg-900",
         "via-darkbg-800",
         "to-darkbg-900",
+        // "bg-[#000000]",
         "flex",
         "items-center",
         "justify-center",
@@ -16,7 +17,8 @@ pub fn home() -> Html {
         "animate-gradient",
         "bg-[size:400%_400%]",
         "p-6",
-        "gap-16"
+        "gap-16",
+        // "opacity-30"
     );
     html! {
         <div class={classes}>
@@ -26,9 +28,9 @@ pub fn home() -> Html {
                 <WeatherHumidity />
                 <WeatherForecast />
                 // TODO: conditional based on state
-                // <TaskReminder />
-                // <CalendarReminder />
-                // <Alert />
+                <TaskReminder />
+                <CalendarReminder />
+                <Alert />
             </Carousel>
         </div>
     }

@@ -70,10 +70,10 @@ pub fn clock() -> Html {
 
     html! {
         <div class="flex flex-col min-w-[40%]">
-            <div class="text-8xl">
+            <div class="text-9xl">
                 {formatted_date(&*now)}
             </div>
-            <div class="text-[20rem] leading-[20rem]">
+            <div class="text-[18rem] leading-[18rem]">
                 {formatted_time(&*now)}
             </div>
         </div>
