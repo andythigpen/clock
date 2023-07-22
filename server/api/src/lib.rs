@@ -4,10 +4,10 @@ use std::{
     net::{IpAddr, Ipv6Addr, SocketAddr},
     path::PathBuf,
     str::FromStr,
-    sync::Arc,
     time::Duration,
 };
 
+use anyhow::Result;
 use axum::{
     body::{boxed, Body},
     error_handling::HandleErrorLayer,
@@ -20,7 +20,9 @@ use tokio::fs;
 use tower::{ServiceBuilder, ServiceExt};
 use tower_http::{services::ServeDir, trace::TraceLayer};
 
-use anyhow::Result;
+use crate::websocket::ws_handler;
+
+mod websocket;
 
 #[derive(Clone)]
 pub struct AppState {}
@@ -51,14 +53,15 @@ async fn start() -> Result<()> {
         .unwrap_or("8080".to_string())
         .parse()
         .unwrap();
-    let log_level = env::var("LOG_LEVEL").unwrap_or("info".to_string());
+    let log_level = env::var("LOG_LEVEL").unwrap_or("debug".to_string());
     if env::var("RUST_LOG").is_err() {
-        env::set_var("RUST_LOG", format!("{},hyper=info,mio=info", log_level))
+        env::set_var(
+            "RUST_LOG",
+            format!("{},hyper=info,mio=info,tower_http=info", log_level),
+        )
     }
 
     tracing_subscriber::fmt::init();
-
-    let state = Arc::new(AppState {});
 
     let app = Router::new()
         .fallback_service(get(|req| async move {
@@ -98,7 +101,8 @@ async fn start() -> Result<()> {
                 .concurrency_limit(1024)
                 .timeout(Duration::from_secs(10)),
         )
-        .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()));
+        .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
+        .route("/api/ws", get(ws_handler));
 
     let sock_addr = SocketAddr::from((
         IpAddr::from_str(addr.as_str()).unwrap_or(IpAddr::V6(Ipv6Addr::LOCALHOST)),
@@ -108,7 +112,7 @@ async fn start() -> Result<()> {
     log::info!("listening on http://{}", sock_addr);
 
     axum::Server::bind(&sock_addr)
-        .serve(app.into_make_service())
+        .serve(app.into_make_service_with_connect_info::<SocketAddr>())
         .await
         .expect("Unable to start server");
 

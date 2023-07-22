@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "dto",
     "frontend",
     "frontend/components",
     "frontend/pages",

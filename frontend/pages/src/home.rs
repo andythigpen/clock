@@ -14,7 +14,7 @@ pub fn home() -> Html {
         "justify-center",
         "h-screen",
         "w-screen",
-        "animate-gradient",
+        // "animate-gradient",
         "bg-[size:400%_400%]",
         "p-6",
         "gap-16",

@@ -11,7 +11,7 @@ prod-server:
 	@cargo build --release --bin server
 
 dev-frontend:
-	@cd frontend && trunk serve --proxy-backend=http://[::1]:8081/api/
+	@cd frontend && trunk serve --proxy-backend=http://[::1]:8081/api/ --proxy-ws --address=0.0.0.0
 
 dev-server:
 	@PORT=8081 cargo watch -- cargo run --bin server

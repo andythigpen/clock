@@ -9,6 +9,7 @@ edition = "2021"
 components = { path = "./components" }
 console_error_panic_hook = "0.1.7"
 gloo-net = "0.2.6"
+futures = "0.3.28"
 log = "0.4.18"
 pages = { path = "./pages" }
 router = { path = "./router" }
