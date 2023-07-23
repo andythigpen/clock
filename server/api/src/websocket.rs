@@ -1,19 +1,18 @@
 use axum::{
     extract::connect_info::ConnectInfo,
-    extract::ws::{CloseFrame, Message, WebSocket, WebSocketUpgrade},
+    extract::ws::{Message, WebSocket, WebSocketUpgrade},
     extract::TypedHeader,
     response::IntoResponse,
 };
 use futures_util::{sink::SinkExt, stream::StreamExt};
 use log::{debug, error};
-use std::borrow::Cow;
 use std::net::SocketAddr;
 use std::ops::ControlFlow;
 use tokio::sync::mpsc;
 
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
-    user_agent: Option<TypedHeader<headers::UserAgent>>,
+    _user_agent: Option<TypedHeader<headers::UserAgent>>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
 ) -> impl IntoResponse {
     ws.on_upgrade(move |socket| handle_socket(socket, addr))
@@ -45,22 +44,6 @@ async fn handle_socket(mut socket: WebSocket, who: SocketAddr) {
         }
     }
 
-    // Since each client gets individual statemachine, we can pause handling
-    // when necessary to wait for some external event (in this case illustrated by sleeping).
-    // Waiting for this client to finish getting its greetings does not prevent other clients from
-    // connecting to server and receiving their greetings.
-    // for i in 1..5 {
-    //     if socket
-    //         .send(Message::Text(format!("Hi {i} times!")))
-    //         .await
-    //         .is_err()
-    //     {
-    //         debug!("client {who} abruptly disconnected");
-    //         return;
-    //     }
-    //     tokio::time::sleep(std::time::Duration::from_millis(100)).await;
-    // }
-
     // By splitting socket we can send and receive at the same time. In this example we will send
     // unsolicited messages to client based on some sort of server's internal event (i.e .timer).
     let (mut sender, mut receiver) = socket.split();
@@ -70,12 +53,7 @@ async fn handle_socket(mut socket: WebSocket, who: SocketAddr) {
         service::home_assistant::run(tx).await;
     });
 
-    // Spawn a task that will push several messages to the client (does not matter what client does)
     let mut send_task = tokio::spawn(async move {
-        // if let Err(e) = service::weather_current::send_state(tx).await {
-        //     error!("error: {e}");
-        // }
-
         while let Some(msg) = rx.recv().await {
             if let Ok(msg) = serde_json::to_string(&msg) {
                 if let Err(e) = sender.send(Message::Text(msg)).await {
@@ -83,35 +61,8 @@ async fn handle_socket(mut socket: WebSocket, who: SocketAddr) {
                 }
             }
         }
-
-        // let n_msg = 20;
-        // for i in 0..n_msg {
-        //     // In case of any websocket error, we exit.
-        //     if sender
-        //         .send(Message::Text(format!("Server message {i} ...")))
-        //         .await
-        //         .is_err()
-        //     {
-        //         return i;
-        //     }
-        //
-        //     tokio::time::sleep(std::time::Duration::from_millis(300)).await;
-        // }
-        //
-        // debug!("Sending close to {who}...");
-        // if let Err(e) = sender
-        //     .send(Message::Close(Some(CloseFrame {
-        //         code: axum::extract::ws::close_code::NORMAL,
-        //         reason: Cow::from("Goodbye"),
-        //     })))
-        //     .await
-        // {
-        //     debug!("Could not send Close due to {}, probably it is ok?", e);
-        // }
-        // n_msg
     });
 
-    // This second task will receive messages from client and print them on server console
     let mut recv_task = tokio::spawn(async move {
         let mut cnt = 0;
         while let Some(Ok(msg)) = receiver.next().await {

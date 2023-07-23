@@ -1,0 +1,12 @@
+[Unit]
+Description=Clock
+After=network.target
+
+[Service]
+Restart=on-failure
+User=pi
+ExecStart=/home/pi/clock/server
+WorkingDirectory=/home/pi/clock
+
+[Install]
+WantedBy=multi-user.target
