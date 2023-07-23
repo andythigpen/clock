@@ -4,7 +4,7 @@ use js_sys::Date;
 pub fn is_day() -> bool {
     let now = Date::new_0();
     let hour = now.get_hours();
-    hour < 6 || hour > 19
+    hour >= 6 && hour <= 19
 }
 
 pub fn weather_icon(condition: &WeatherCondition) -> String {

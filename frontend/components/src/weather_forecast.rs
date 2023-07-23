@@ -15,6 +15,8 @@ pub fn weather_forecast(props: &Props) -> Html {
     let index = props.index as usize;
     let store = use_store_value::<WeatherStore>();
     let forecast = store.weather.forecast[index].clone();
+    let hour = twelve_hour(forecast.hour as u32);
+    let hour = format!("{hour:02}");
 
     html! {
         <div class="flex-1 flex flex-col">
@@ -22,7 +24,7 @@ pub fn weather_forecast(props: &Props) -> Html {
                 <img src={weather_icon(&forecast.condition)} class="h-96"/>
                 <span class="text-[15rem]">{forecast.temp_f}<span class="text-9xl">{"°F"}</span></span>
                 <span class="text-9xl ml-8">{"@"}</span>
-                <span class="text-[15rem]">{twelve_hour(forecast.hour as u32)}</span>
+                <span class="text-[15rem]">{hour}</span>
             </div>
         </div>
     }
