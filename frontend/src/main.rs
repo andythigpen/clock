@@ -44,7 +44,7 @@ fn handle_message(msg: String) -> Result<()> {
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let ws = WebSocket::open("ws://localhost:8081/api/ws").unwrap();
+    let ws = WebSocket::open("ws://localhost:8080/api/ws").unwrap();
     let (_, mut read) = ws.split();
     spawn_local(async move {
         while let Some(msg) = read.next().await {
