@@ -22,6 +22,8 @@ use tower_http::{services::ServeDir, trace::TraceLayer};
 
 use crate::websocket::ws_handler;
 
+mod display;
+mod error;
 mod websocket;
 
 #[derive(Clone)]
@@ -102,7 +104,8 @@ async fn start() -> Result<()> {
                 .timeout(Duration::from_secs(10)),
         )
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
-        .route("/api/ws", get(ws_handler));
+        .route("/api/ws", get(ws_handler))
+        .nest("/api/display", display::router());
 
     let sock_addr = SocketAddr::from((
         IpAddr::from_str(addr.as_str()).unwrap_or(IpAddr::V6(Ipv6Addr::LOCALHOST)),
