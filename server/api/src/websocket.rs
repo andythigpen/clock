@@ -1,24 +1,29 @@
 use axum::{
     extract::connect_info::ConnectInfo,
-    extract::ws::{Message, WebSocket, WebSocketUpgrade},
     extract::TypedHeader,
+    extract::{
+        ws::{Message, WebSocket, WebSocketUpgrade},
+        State,
+    },
     response::IntoResponse,
 };
 use futures_util::{sink::SinkExt, stream::StreamExt};
 use log::{debug, error};
-use std::net::SocketAddr;
 use std::ops::ControlFlow;
-use tokio::sync::mpsc;
+use std::{net::SocketAddr, sync::Arc};
+
+use crate::AppState;
 
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
     _user_agent: Option<TypedHeader<headers::UserAgent>>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    State(state): State<Arc<AppState>>,
 ) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| handle_socket(socket, addr))
+    ws.on_upgrade(move |socket| handle_socket(socket, addr, state))
 }
 
-async fn handle_socket(mut socket: WebSocket, who: SocketAddr) {
+async fn handle_socket(mut socket: WebSocket, who: SocketAddr, state: Arc<AppState>) {
     //send a ping (unsupported by some browsers) just to kick things off and get a response
     if socket.send(Message::Ping(vec![1, 2, 3])).await.is_ok() {
         debug!("Pinged {}...", who);
@@ -47,14 +52,15 @@ async fn handle_socket(mut socket: WebSocket, who: SocketAddr) {
     // By splitting socket we can send and receive at the same time. In this example we will send
     // unsolicited messages to client based on some sort of server's internal event (i.e .timer).
     let (mut sender, mut receiver) = socket.split();
-    let (tx, mut rx) = mpsc::channel(32);
+    let tx = state.channel.clone();
+    let mut rx = state.channel.subscribe();
 
     let poller_task = tokio::spawn(async move {
         service::home_assistant::run(tx).await;
     });
 
     let mut send_task = tokio::spawn(async move {
-        while let Some(msg) = rx.recv().await {
+        while let Ok(msg) = rx.recv().await {
             if let Ok(msg) = serde_json::to_string(&msg) {
                 if let Err(e) = sender.send(Message::Text(msg)).await {
                     error!("error sending: {e}");

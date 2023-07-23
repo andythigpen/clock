@@ -1,26 +1,34 @@
 use anyhow::{anyhow, Result};
 use axum::{
-    extract::Path,
+    extract::{Path, State},
     routing::{get, post},
     Router,
 };
+use dto::{DisplayState, Message};
 use log::error;
-use std::{env, process::Command};
+use std::{env, process::Command, sync::Arc};
 
-use crate::error::RestError;
+use crate::{error::RestError, AppState};
 
-async fn set_state(Path(state): Path<String>) -> Result<(), RestError> {
+async fn set_state(
+    Path(action): Path<String>,
+    State(state): State<Arc<AppState>>,
+) -> Result<(), RestError> {
     let display_cmd = env::var("DISPLAY_CMD").unwrap_or("vcgencmd".to_string());
     let on_args = env::var("DISPLAY_ON_ARGS").unwrap_or("display_power 1".to_string());
     let off_args = env::var("DISPLAY_OFF_ARGS").unwrap_or("display_power 0".to_string());
-    let args: Vec<&str> = match state.as_str() {
-        "on" => on_args.split(" ").collect(),
-        "off" => off_args.split(" ").collect(),
+    let display_state = match action.as_str() {
+        "on" => DisplayState::On,
+        "off" => DisplayState::Off,
         _ => {
             return Err(RestError::Invalid(
-                "invalid state: expected on or off".to_string(),
+                "invalid action: expected on or off".to_string(),
             ))
         }
+    };
+    let args: Vec<&str> = match display_state {
+        DisplayState::On => on_args.split(" ").collect(),
+        DisplayState::Off => off_args.split(" ").collect(),
     };
     let output = Command::new(display_cmd)
         .args(args)
@@ -31,6 +39,12 @@ async fn set_state(Path(state): Path<String>) -> Result<(), RestError> {
         let output = output.status.to_string();
         error!("unexpected exit {code}: {output}");
         return Err(RestError::Internal(anyhow!("unexpected exit code")));
+    }
+    if let Err(e) = state
+        .channel
+        .send(Message::DisplayStateChange(display_state))
+    {
+        error!("failed to broadcast state change: {e}");
     }
     Ok(())
 }
@@ -56,8 +70,9 @@ async fn get_state() -> Result<String, RestError> {
     Ok(stdout)
 }
 
-pub fn router() -> Router {
+pub fn router(state: Arc<AppState>) -> Router {
     Router::new()
-        .route("/state/:state", post(set_state))
+        .route("/state/:action", post(set_state))
         .route("/state", get(get_state))
+        .with_state(state)
 }

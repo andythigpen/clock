@@ -8,7 +8,7 @@ use reqwest::{header::AUTHORIZATION, StatusCode};
 use serde::Deserialize;
 use serde_json::Value;
 use time::{format_description::well_known::Iso8601, OffsetDateTime};
-use tokio::sync::mpsc::Sender;
+use tokio::sync::broadcast::Sender;
 use tokio::{macros::support::poll_fn, time::Instant};
 use tokio_util::time::DelayQueue;
 
@@ -118,8 +118,8 @@ impl Poller {
                     self.queue.insert(event.clone(), Duration::from_secs(30));
                     match self.handle(event).await {
                         Ok(msg) => {
-                            if let Err(e) = self.tx.send(msg).await {
-                                error!("failed to send msg: {e:?}");
+                            if let Err(e) = self.tx.send(msg) {
+                                error!("failed to send msg: {e}");
                             }
                         }
                         Err(e) => error!("error handling event: {e}"),

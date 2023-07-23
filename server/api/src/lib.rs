@@ -4,6 +4,7 @@ use std::{
     net::{IpAddr, Ipv6Addr, SocketAddr},
     path::PathBuf,
     str::FromStr,
+    sync::Arc,
     time::Duration,
 };
 
@@ -16,7 +17,8 @@ use axum::{
     routing::get,
     BoxError, Router,
 };
-use tokio::fs;
+use dto::Message;
+use tokio::{fs, sync::broadcast};
 use tower::{ServiceBuilder, ServiceExt};
 use tower_http::{services::ServeDir, trace::TraceLayer};
 
@@ -27,7 +29,9 @@ mod error;
 mod websocket;
 
 #[derive(Clone)]
-pub struct AppState {}
+pub struct AppState {
+    channel: broadcast::Sender<Message>,
+}
 
 async fn handle_error(error: BoxError) -> impl IntoResponse {
     if error.is::<tower::timeout::error::Elapsed>() {
@@ -59,11 +63,14 @@ async fn start() -> Result<()> {
     if env::var("RUST_LOG").is_err() {
         env::set_var(
             "RUST_LOG",
-            format!("{},hyper=info,mio=info,tower_http=info", log_level),
+            format!("{},hyper=info,mio=info,tower_http=debug", log_level),
         )
     }
 
     tracing_subscriber::fmt::init();
+
+    let (channel, _) = broadcast::channel(32);
+    let state = Arc::new(AppState { channel });
 
     let app = Router::new()
         .fallback_service(get(|req| async move {
@@ -105,7 +112,8 @@ async fn start() -> Result<()> {
         )
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
         .route("/api/ws", get(ws_handler))
-        .nest("/api/display", display::router());
+        .with_state(state.clone())
+        .nest("/api/display", display::router(state.clone()));
 
     let sock_addr = SocketAddr::from((
         IpAddr::from_str(addr.as_str()).unwrap_or(IpAddr::V6(Ipv6Addr::LOCALHOST)),

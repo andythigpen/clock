@@ -1,12 +1,13 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Message {
     Weather(Weather),
     TaskReminders(Vec<Reminder>),
     CalendarReminders(Vec<Reminder>),
     Alerts(Vec<Alert>),
     Sun(Sun),
+    DisplayStateChange(DisplayState),
 }
 
 #[derive(Clone, Default, PartialEq, Eq, Serialize, Deserialize, Debug)]
@@ -70,28 +71,34 @@ pub struct HourForecast {
     pub precipitation_chance: u8,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Reminder {
     pub name: String,
     pub due: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum AlertSeverity {
     Info,
     Warning,
     Critical,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Alert {
     pub name: String,
     pub severity: AlertSeverity,
     pub persist: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Sun {
     pub rise: String,
     pub set: String,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub enum DisplayState {
+    On,
+    Off,
 }
