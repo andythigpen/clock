@@ -1,6 +1,7 @@
 use anyhow::Result;
 use futures::StreamExt;
 use gloo_net::websocket::{futures::WebSocket, Message as WsMessage};
+use gloo_timers::future::TimeoutFuture;
 use log::{debug, error, info};
 use wasm_bindgen_futures::spawn_local;
 use web_sys::window;
@@ -57,23 +58,27 @@ fn handle_message(msg: String) -> Result<()> {
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let host = window().unwrap().location().host().unwrap();
-    let ws = WebSocket::open(&format!("ws://{host}/api/ws")).unwrap();
-    let (_, mut read) = ws.split();
     spawn_local(async move {
-        while let Some(msg) = read.next().await {
-            debug!("{msg:?}");
-            match msg {
-                Ok(WsMessage::Text(msg)) => {
-                    if let Err(e) = handle_message(msg) {
-                        error!("failed to handle message: {e}");
+        loop {
+            let host = window().unwrap().location().host().unwrap();
+            let ws = WebSocket::open(&format!("ws://{host}/api/ws")).unwrap();
+            let (_, mut read) = ws.split();
+
+            while let Some(msg) = read.next().await {
+                debug!("{msg:?}");
+                match msg {
+                    Ok(WsMessage::Text(msg)) => {
+                        if let Err(e) = handle_message(msg) {
+                            error!("failed to handle message: {e}");
+                        }
                     }
+                    Ok(WsMessage::Bytes(_)) => error!("unexepected bytes message"),
+                    Err(e) => error!("websocket error: {e}"),
                 }
-                Ok(WsMessage::Bytes(_)) => error!("unexepected bytes message"),
-                Err(e) => error!("websocket error: {e}"),
             }
+            info!("websocket closed");
+            TimeoutFuture::new(1000).await;
         }
-        info!("websocket closed");
     });
     html! {
         <BrowserRouter>

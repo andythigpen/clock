@@ -490,6 +490,7 @@ dependencies = [
  "dto",
  "futures",
  "gloo-net 0.2.6",
+ "gloo-timers",
  "log",
  "pages",
  "router",

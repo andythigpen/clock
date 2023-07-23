@@ -23,3 +23,4 @@ serde_json = "1.0.103"
 stores = { path = "./stores" }
 anyhow = "1.0.72"
 web-sys = { version = "0.3.64", features = ["Window", "Location"] }
+gloo-timers = { version = "0.2.6", features = ["futures"] }
