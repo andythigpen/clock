@@ -18,6 +18,7 @@ pub enum Widget {
 pub struct WidgetStore {
     enabled: Vec<Widget>,
     current: usize,
+    pub display: bool,
 }
 
 impl WidgetStore {

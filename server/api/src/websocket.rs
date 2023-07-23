@@ -56,6 +56,9 @@ async fn handle_socket(mut socket: WebSocket, who: SocketAddr, state: Arc<AppSta
     let mut rx = state.channel.subscribe();
 
     let poller_task = tokio::spawn(async move {
+        if let Ok(display_state) = service::display::get_state() {
+            service::display::broadcast_state(display_state, &tx);
+        }
         service::home_assistant::run(tx).await;
     });
 

@@ -2,7 +2,7 @@ use anyhow::Result;
 use axum::{
     extract::{Path, State},
     routing::{get, post},
-    Router,
+    Json, Router,
 };
 use dto::DisplayState;
 use std::sync::Arc;
@@ -25,8 +25,9 @@ async fn set_state(
     service::display::set_state(display_state, &state.channel).map_err(|e| e.into())
 }
 
-async fn get_state() -> Result<String, RestError> {
-    service::display::get_state().map_err(|e| e.into())
+async fn get_state() -> Result<Json<DisplayState>, RestError> {
+    let state = service::display::get_state()?;
+    Ok(Json(state))
 }
 
 pub fn router(state: Arc<AppState>) -> Router {

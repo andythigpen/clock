@@ -3,11 +3,12 @@ use futures::StreamExt;
 use gloo_net::websocket::{futures::WebSocket, Message as WsMessage};
 use log::{debug, error, info};
 use wasm_bindgen_futures::spawn_local;
+use web_sys::window;
 use yew::prelude::*;
 use yew_router::prelude::*;
 use yewdux::prelude::*;
 
-use dto::Message;
+use dto::{DisplayState, Message};
 use pages::home::Home;
 use router::Route;
 use stores::{WeatherStore, Widget, WidgetStore};
@@ -38,7 +39,14 @@ fn handle_message(msg: String) -> Result<()> {
         Message::CalendarReminders(_) => error!("unimplemented"),
         Message::Alerts(_) => error!("unimplemented"),
         Message::Sun(_) => error!("unimplemented"),
-        Message::DisplayStateChange(_) => error!("unimplemented"),
+        Message::DisplayStateChange(state) => {
+            Dispatch::<WidgetStore>::new().reduce_mut(|s| {
+                s.display = match state {
+                    DisplayState::On => true,
+                    DisplayState::Off => false,
+                }
+            });
+        }
     }
     Ok(())
 }

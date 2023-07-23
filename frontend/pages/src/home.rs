@@ -1,5 +1,7 @@
 use components::*;
+use stores::WidgetStore;
 use yew::prelude::*;
+use yewdux::prelude::use_selector;
 
 #[function_component(Home)]
 pub fn home() -> Html {
@@ -20,10 +22,17 @@ pub fn home() -> Html {
         "gap-16",
         // "opacity-30"
     );
+
+    let display = use_selector(|s: &WidgetStore| s.display);
+
     html! {
         <div class={classes}>
-            <Clock />
-            <Carousel />
+            if *display {
+                <Clock />
+                <Carousel />
+            } else {
+                <span class={classes!("text-7xl", "text-gray-400")}>{"Disabled"}</span>
+            }
         </div>
     }
 }
