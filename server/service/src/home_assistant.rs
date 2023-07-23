@@ -57,37 +57,30 @@ pub async fn fetch_entity(entity_id: &str) -> Result<Value> {
 async fn fetch_weather(entity_id: &str) -> Result<Message> {
     let json = fetch_entity(&entity_id).await?;
     let entity: WeatherEntity = serde_json::from_value(json)?;
-    let forecast = entity.attributes.forecast;
+    let entity_forecast = entity.attributes.forecast;
+
+    let mut forecasts = vec![];
+    for hour in entity_forecast {
+        let datetime = OffsetDateTime::parse(&hour.datetime, &Iso8601::DEFAULT)?;
+        let current_hour = OffsetDateTime::now_utc()
+            .to_offset(datetime.offset())
+            .hour();
+        if datetime.hour() <= current_hour {
+            continue;
+        }
+        forecasts.push(HourForecast {
+            condition: (&hour.condition).into(),
+            temp_f: hour.temperature,
+            precipitation_chance: hour.precipitation_probability,
+            hour: datetime.hour(),
+        });
+    }
+
     Ok(Message::Weather(dto::Weather {
         condition: (&entity.state).into(),
         temp_f: entity.attributes.temperature,
         humidity: entity.attributes.humidity,
-        forecast: vec![
-            HourForecast {
-                condition: (&forecast[0].condition).into(),
-                temp_f: forecast[0].temperature,
-                precipitation_chance: forecast[0].precipitation_probability,
-                hour: OffsetDateTime::parse(&forecast[0].datetime, &Iso8601::DEFAULT)?.hour(),
-            },
-            HourForecast {
-                condition: (&forecast[1].condition).into(),
-                temp_f: forecast[1].temperature,
-                precipitation_chance: forecast[1].precipitation_probability,
-                hour: OffsetDateTime::parse(&forecast[1].datetime, &Iso8601::DEFAULT)?.hour(),
-            },
-            HourForecast {
-                condition: (&forecast[2].condition).into(),
-                temp_f: forecast[2].temperature,
-                precipitation_chance: forecast[2].precipitation_probability,
-                hour: OffsetDateTime::parse(&forecast[2].datetime, &Iso8601::DEFAULT)?.hour(),
-            },
-            HourForecast {
-                condition: (&forecast[3].condition).into(),
-                temp_f: forecast[3].temperature,
-                precipitation_chance: forecast[3].precipitation_probability,
-                hour: OffsetDateTime::parse(&forecast[3].datetime, &Iso8601::DEFAULT)?.hour(),
-            },
-        ],
+        forecast: forecasts,
     }))
 }
 

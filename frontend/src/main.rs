@@ -10,7 +10,7 @@ use yewdux::prelude::*;
 use dto::Message;
 use pages::home::Home;
 use router::Route;
-use stores::WeatherStore;
+use stores::{WeatherStore, Widget, WidgetStore};
 
 fn switch(routes: Route) -> Html {
     match routes {
@@ -21,9 +21,19 @@ fn switch(routes: Route) -> Html {
 fn handle_message(msg: String) -> Result<()> {
     let msg = serde_json::from_str::<Message>(&msg)?;
     match msg {
-        Message::Weather(weather) => {
-            Dispatch::<WeatherStore>::new().reduce_mut(|s| s.weather = weather)
-        }
+        Message::Weather(weather) => Dispatch::<WeatherStore>::new().reduce_mut(|s| {
+            s.weather = weather;
+            if !s.ready {
+                Dispatch::<WidgetStore>::new().reduce_mut(|s| {
+                    s.enable(Widget::WeatherCurrent);
+                    s.enable(Widget::WeatherForecast(0));
+                    s.enable(Widget::WeatherForecast(1));
+                    s.enable(Widget::WeatherHumidity);
+                });
+            }
+            s.ready = true;
+            debug!("ready");
+        }),
         Message::TaskReminders(_) => error!("unimplemented"),
         Message::CalendarReminders(_) => error!("unimplemented"),
         Message::Alerts(_) => error!("unimplemented"),

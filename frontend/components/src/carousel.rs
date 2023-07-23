@@ -1,37 +1,30 @@
+use crate::{WeatherCurrent, WeatherForecast, WeatherHumidity};
 use gloo_timers::callback::{Interval, Timeout};
+use stores::{Widget, WidgetStore};
 use web_sys::Element;
 use yew::prelude::*;
-
-#[derive(PartialEq, Properties)]
-pub struct Props {
-    pub children: Children,
-}
+use yewdux::prelude::*;
 
 #[function_component(Carousel)]
-pub fn carousel(props: &Props) -> Html {
-    let child = use_state(|| props.children.iter().next());
-    let children_iter = use_mut_ref(|| props.children.clone().into_iter().cycle());
+pub fn carousel() -> Html {
+    let current = use_selector(|s: &WidgetStore| s.current());
     let node = use_node_ref();
     let classes = classes!("flex", "flex-1", "transition", "duration-700");
 
     use_effect_with_deps(
         {
-            let child = child.clone();
-            let children_iter = children_iter.clone();
             let node = node.clone();
             let classes = classes.clone();
             move |_| {
-                let interval = Interval::new(10000, move || {
+                let interval = Interval::new(15000, move || {
                     if let Some(elem) = node.cast::<Element>() {
                         let mut hidden_classes = classes.clone();
                         hidden_classes.push("opacity-0");
                         elem.set_class_name(&hidden_classes.to_string());
 
                         let classes = classes.clone();
-                        let children_iter = children_iter.clone();
-                        let child = child.clone();
                         let timeout = Timeout::new(700, move || {
-                            child.set((*children_iter).borrow_mut().next());
+                            Dispatch::<WidgetStore>::new().reduce_mut(|s| s.next());
                             elem.set_class_name(&classes.to_string());
                         });
                         timeout.forget();
@@ -45,9 +38,15 @@ pub fn carousel(props: &Props) -> Html {
         (),
     );
 
+    let widget = (*current).as_ref().map(|c| match c {
+        Widget::WeatherCurrent => html! { <WeatherCurrent /> },
+        Widget::WeatherForecast(index) => html! { <WeatherForecast index={index} /> },
+        Widget::WeatherHumidity => html! { <WeatherHumidity /> },
+    });
+
     html! {
         <div ref={node} class={classes}>
-            {(*child).clone()}
+            {widget}
         </div>
     }
 }

@@ -9,7 +9,7 @@ pub enum Message {
     Sun(Sun),
 }
 
-#[derive(Clone, Default, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Default, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub enum WeatherCondition {
     Clear,
     Cloudy,
@@ -54,7 +54,7 @@ impl From<&String> for WeatherCondition {
     }
 }
 
-#[derive(Clone, Default, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Default, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub struct Weather {
     pub condition: WeatherCondition,
     pub temp_f: u8,
@@ -62,7 +62,7 @@ pub struct Weather {
     pub forecast: Vec<HourForecast>,
 }
 
-#[derive(Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub struct HourForecast {
     pub condition: WeatherCondition,
     pub temp_f: u8,

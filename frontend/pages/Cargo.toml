@@ -7,4 +7,7 @@ edition = "2021"
 
 [dependencies]
 components = { path = "../components" }
+log = "0.4.19"
+stores = { path = "../stores" }
 yew = { version = "0.20.0", features = ["csr"] }
+yewdux = "0.9.3"

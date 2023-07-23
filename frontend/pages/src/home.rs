@@ -23,15 +23,7 @@ pub fn home() -> Html {
     html! {
         <div class={classes}>
             <Clock />
-            <Carousel>
-                <WeatherCurrent />
-                <WeatherHumidity />
-                <WeatherForecast />
-                // TODO: conditional based on state
-                <TaskReminder />
-                <CalendarReminder />
-                <Alert />
-            </Carousel>
+            <Carousel />
         </div>
     }
 }
