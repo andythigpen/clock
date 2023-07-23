@@ -314,13 +314,16 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 name = "components"
 version = "0.1.0"
 dependencies = [
+ "dto",
  "gloo-net 0.3.0",
  "gloo-timers",
  "js-sys",
  "log",
+ "stores",
  "wasm-bindgen",
  "web-sys",
  "yew",
+ "yewdux",
 ]
 
 [[package]]
@@ -528,13 +531,17 @@ dependencies = [
 name = "frontend"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "components",
  "console_error_panic_hook",
+ "dto",
  "futures",
  "gloo-net 0.2.6",
  "log",
  "pages",
  "router",
+ "serde_json",
+ "stores",
  "wasm-bindgen-futures",
  "wasm-logger",
  "yew",
@@ -1740,6 +1747,10 @@ dependencies = [
 [[package]]
 name = "stores"
 version = "0.1.0"
+dependencies = [
+ "dto",
+ "yewdux",
+]
 
 [[package]]
 name = "strsim"

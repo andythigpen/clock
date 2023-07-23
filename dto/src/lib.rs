@@ -9,24 +9,7 @@ pub enum Message {
     Sun(Sun),
 }
 
-/*
-    ‘clear-night’ -> clear-night
-    ‘cloudy’ -> cloudy (overcast-day, overcast-night)
-    ‘fog’ -> fog (fog-day, fog-night)
-    ‘hail’ -> hail
-    ‘lightning’ -> thunderstorms (thunderstorms-day, thunderstorms-night)
-    ‘lightning-rainy’ -> thunderstorms-rain (thunderstorms-day-rain, thunderstorms-night-rain)
-    ‘partlycloudy’ -> partly-cloudy-day, partly-cloudy-night
-    ‘pouring’ -> rain
-    ‘rainy’ -> rain
-    ‘snowy’ -> snow
-    ‘snowy-rainy’ -> sleet
-    ‘sunny’ -> clear-day
-    ‘windy’ -> wind
-    ‘windy-variant’ -> wind
-    ‘exceptional’ -> code-red
-*/
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Default, PartialEq, Serialize, Deserialize)]
 pub enum WeatherCondition {
     Clear,
     Cloudy,
@@ -39,6 +22,7 @@ pub enum WeatherCondition {
     Snow,
     Thunderstorms,
     ThunderstormsRain,
+    #[default]
     Unknown,
     Windy,
 }
@@ -70,7 +54,7 @@ impl From<&String> for WeatherCondition {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct Weather {
     pub condition: WeatherCondition,
     pub temp_f: u8,
@@ -78,7 +62,7 @@ pub struct Weather {
     pub forecast: Vec<HourForecast>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct HourForecast {
     pub condition: WeatherCondition,
     pub temp_f: u8,
