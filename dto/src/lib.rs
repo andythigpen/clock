@@ -8,6 +8,7 @@ pub enum Message {
     Alerts(Vec<Alert>),
     Sun(Sun),
     DisplayStateChange(DisplayState),
+    DisplayBrightness(u8),
 }
 
 #[derive(Clone, Default, PartialEq, Eq, Serialize, Deserialize, Debug)]

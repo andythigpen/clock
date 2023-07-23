@@ -64,3 +64,10 @@ pub fn broadcast_state(display_state: DisplayState, channel: &Sender<Message>) {
         error!("failed to broadcast state change: {e}");
     }
 }
+
+pub fn set_brightness(brightness: u8, channel: &Sender<Message>) {
+    let brightness = (brightness - (brightness % 10)).min(100);
+    if let Err(e) = channel.send(Message::DisplayBrightness(brightness)) {
+        error!("failed to broadcast brightness change: {e}");
+    }
+}

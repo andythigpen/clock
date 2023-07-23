@@ -13,6 +13,7 @@ dto = { path = "../../dto" }
 futures-util = { version = "0.3.28", default-features = false, features = ["sink", "std"] }
 headers = "0.3.8"
 log = "0.4.18"
+serde = "1.0.174"
 serde_json = "1.0.103"
 service = { path = "../service" }
 tokio = { version = "1.28.2", features = ["full"] }

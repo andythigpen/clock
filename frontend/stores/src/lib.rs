@@ -19,6 +19,7 @@ pub struct WidgetStore {
     enabled: Vec<Widget>,
     current: usize,
     pub display: bool,
+    pub opacity: u8,
 }
 
 impl WidgetStore {

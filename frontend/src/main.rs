@@ -8,6 +8,7 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 use yewdux::prelude::*;
 
+use components::Overlay;
 use dto::{DisplayState, Message};
 use pages::home::Home;
 use router::Route;
@@ -47,6 +48,9 @@ fn handle_message(msg: String) -> Result<()> {
                 }
             });
         }
+        Message::DisplayBrightness(brightness) => {
+            Dispatch::<WidgetStore>::new().reduce_mut(|s| s.opacity = 100 - brightness);
+        }
     }
     Ok(())
 }
@@ -73,6 +77,7 @@ pub fn app() -> Html {
     });
     html! {
         <BrowserRouter>
+            <Overlay />
             <Switch<Route> render={switch} />
         </BrowserRouter>
     }
