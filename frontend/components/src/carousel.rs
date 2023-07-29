@@ -1,4 +1,4 @@
-use crate::{WeatherCurrent, WeatherForecast, WeatherHumidity};
+use crate::{WeatherCurrent, WeatherForecast, WeatherHumidity, WeatherPrecipitation};
 use gloo_timers::callback::{Interval, Timeout};
 use stores::{Widget, WidgetStore};
 use web_sys::Element;
@@ -42,6 +42,7 @@ pub fn carousel() -> Html {
         Widget::WeatherCurrent => html! { <WeatherCurrent /> },
         Widget::WeatherForecast(index) => html! { <WeatherForecast index={index} /> },
         Widget::WeatherHumidity => html! { <WeatherHumidity /> },
+        Widget::WeatherPrecipitation => html! { <WeatherPrecipitation /> },
     });
 
     html! {

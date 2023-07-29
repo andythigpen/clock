@@ -8,6 +8,7 @@ mod task_reminder;
 mod weather_current;
 mod weather_forecast;
 mod weather_humidity;
+mod weather_precipitation;
 mod weather_util;
 
 pub use alert::*;
@@ -19,3 +20,5 @@ pub use task_reminder::*;
 pub use weather_current::*;
 pub use weather_forecast::*;
 pub use weather_humidity::*;
+pub use weather_precipitation::*;
+pub use weather_util::*;

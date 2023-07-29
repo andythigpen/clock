@@ -12,6 +12,7 @@ pub enum Widget {
     WeatherCurrent,
     WeatherForecast(u8),
     WeatherHumidity,
+    WeatherPrecipitation,
 }
 
 #[derive(Clone, PartialEq, Store, Default)]
@@ -40,5 +41,14 @@ impl WidgetStore {
 
     pub fn enable(&mut self, widget: Widget) {
         self.enabled.push(widget)
+    }
+
+    pub fn disable(&mut self, widget: Widget) {
+        self.enabled = self
+            .enabled
+            .iter()
+            .filter(|w| *w != &widget)
+            .cloned()
+            .collect();
     }
 }

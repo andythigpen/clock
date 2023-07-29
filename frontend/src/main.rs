@@ -9,7 +9,7 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 use yewdux::prelude::*;
 
-use components::Overlay;
+use components::{precipitation_change, Overlay};
 use dto::{DisplayState, Message};
 use pages::home::Home;
 use router::Route;
@@ -25,7 +25,6 @@ fn handle_message(msg: String) -> Result<()> {
     let msg = serde_json::from_str::<Message>(&msg)?;
     match msg {
         Message::Weather(weather) => Dispatch::<WeatherStore>::new().reduce_mut(|s| {
-            s.weather = weather;
             if !s.ready {
                 Dispatch::<WidgetStore>::new().reduce_mut(|s| {
                     s.enable(Widget::WeatherCurrent);
@@ -34,6 +33,16 @@ fn handle_message(msg: String) -> Result<()> {
                     s.enable(Widget::WeatherHumidity);
                 });
             }
+
+            Dispatch::<WidgetStore>::new().reduce_mut(|s| {
+                if let Some(_) = precipitation_change(&weather) {
+                    s.enable(Widget::WeatherPrecipitation);
+                } else {
+                    s.disable(Widget::WeatherPrecipitation);
+                }
+            });
+
+            s.weather = weather;
             s.ready = true;
         }),
         Message::TaskReminders(_) => error!("unimplemented"),
@@ -60,7 +69,13 @@ pub fn app() -> Html {
     spawn_local(async move {
         loop {
             let host = window().unwrap().location().host().unwrap();
-            let ws = WebSocket::open(&format!("ws://{host}/api/ws")).unwrap();
+            let search = window().unwrap().location().search().unwrap();
+            let url = if search.contains("dev") {
+                format!("ws://localhost:8081/api/ws")
+            } else {
+                format!("ws://{host}/api/ws")
+            };
+            let ws = WebSocket::open(&url).unwrap();
             let (_, mut read) = ws.split();
 
             while let Some(msg) = read.next().await {
