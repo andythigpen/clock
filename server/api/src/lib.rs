@@ -63,7 +63,10 @@ async fn start() -> Result<()> {
     if env::var("RUST_LOG").is_err() {
         env::set_var(
             "RUST_LOG",
-            format!("{},hyper=info,mio=info,tower_http=debug", log_level),
+            format!(
+                "{},hyper=info,mio=info,tower_http=info,rustls=info,h2=info",
+                log_level
+            ),
         )
     }
 

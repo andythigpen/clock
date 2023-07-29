@@ -12,7 +12,7 @@ use tokio::sync::broadcast::Sender;
 use tokio::{macros::support::poll_fn, time::Instant};
 use tokio_util::time::DelayQueue;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct WeatherEntityForecast {
     datetime: String,
     condition: String,
@@ -20,14 +20,14 @@ struct WeatherEntityForecast {
     temperature: u8,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct WeatherEntityAttributes {
     temperature: u8,
     humidity: u8,
     forecast: Vec<WeatherEntityForecast>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct WeatherEntity {
     state: String,
     attributes: WeatherEntityAttributes,
@@ -62,10 +62,8 @@ async fn fetch_weather(entity_id: &str) -> Result<Message> {
     let mut forecasts = vec![];
     for hour in entity_forecast {
         let datetime = OffsetDateTime::parse(&hour.datetime, &Iso8601::DEFAULT)?;
-        let current_hour = OffsetDateTime::now_utc()
-            .to_offset(datetime.offset())
-            .hour();
-        if datetime.hour() <= current_hour {
+        let now = OffsetDateTime::now_utc().to_offset(datetime.offset());
+        if datetime < now {
             continue;
         }
         forecasts.push(HourForecast {
@@ -74,6 +72,9 @@ async fn fetch_weather(entity_id: &str) -> Result<Message> {
             precipitation_chance: hour.precipitation_probability,
             hour: datetime.hour(),
         });
+        if forecasts.len() >= 3 {
+            break;
+        }
     }
 
     Ok(Message::Weather(dto::Weather {

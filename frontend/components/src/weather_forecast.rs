@@ -14,10 +14,16 @@ pub struct Props {
 pub fn weather_forecast(props: &Props) -> Html {
     let index = props.index as usize;
     let store = use_store_value::<WeatherStore>();
+    if index >= store.weather.forecast.len() {
+        return html! {
+            <div class="flex-1 flex flex-col">
+                {"Forecast unavailable"}
+            </div>
+        };
+    }
     let forecast = store.weather.forecast[index].clone();
     let hour = twelve_hour(forecast.hour as u32);
     let hour = format!("{hour:02}");
-
     html! {
         <div class="flex-1 flex flex-col">
             <div class="flex-1 flex flex-row gap-4 justify-center items-center">

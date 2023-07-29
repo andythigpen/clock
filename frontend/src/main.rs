@@ -35,7 +35,6 @@ fn handle_message(msg: String) -> Result<()> {
                 });
             }
             s.ready = true;
-            debug!("ready");
         }),
         Message::TaskReminders(_) => error!("unimplemented"),
         Message::CalendarReminders(_) => error!("unimplemented"),
