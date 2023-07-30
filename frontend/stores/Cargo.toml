@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 dto = { path = "../../dto" }
+sorted-vec = "0.8.2"
 yewdux = "0.9.3"

@@ -1,5 +1,6 @@
-use dto::{HourForecast, Weather, WeatherCondition};
+use dto::{HourForecast, Sun, Weather, WeatherCondition};
 use js_sys::Date;
+use time::{ext::NumericalDuration, format_description::well_known::Iso8601, OffsetDateTime};
 
 pub fn is_day() -> bool {
     let now = Date::new_0();
@@ -88,6 +89,22 @@ pub fn precipitation_change(weather: &Weather) -> Option<HourForecast> {
         .collect();
 
     forecast.first().cloned()
+}
+
+/// Returns true if the rise/set fields are occurring soon (< 2h).
+pub fn sun_change(sun: &Sun) -> bool {
+    let now = Date::new_0().to_iso_string();
+    let now = OffsetDateTime::parse(&now.as_string().unwrap(), &Iso8601::DEFAULT).unwrap();
+    let soon = now.checked_add(2.hours()).unwrap();
+    let rise_date = OffsetDateTime::parse(&sun.rise, &Iso8601::DEFAULT).unwrap();
+    let set_date = OffsetDateTime::parse(&sun.set, &Iso8601::DEFAULT).unwrap();
+
+    (rise_date >= now && rise_date < soon) || (set_date >= now && set_date < soon)
+}
+
+pub fn sun_icon(rising: bool) -> String {
+    let svg = if rising { "sunrise" } else { "sunset" };
+    format!("/assets/icons/weather/{svg}.svg")
 }
 
 #[cfg(test)]

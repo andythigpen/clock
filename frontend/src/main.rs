@@ -9,7 +9,7 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 use yewdux::prelude::*;
 
-use components::{precipitation_change, Overlay};
+use components::{precipitation_change, sun_change, Overlay};
 use dto::{DisplayState, Message};
 use pages::home::Home;
 use router::Route;
@@ -25,30 +25,33 @@ fn handle_message(msg: String) -> Result<()> {
     let msg = serde_json::from_str::<Message>(&msg)?;
     match msg {
         Message::Weather(weather) => Dispatch::<WeatherStore>::new().reduce_mut(|s| {
-            if !s.ready {
-                Dispatch::<WidgetStore>::new().reduce_mut(|s| {
-                    s.enable(Widget::WeatherCurrent);
-                    s.enable(Widget::WeatherForecast(0));
-                    s.enable(Widget::WeatherForecast(1));
-                    s.enable(Widget::WeatherHumidity);
-                });
-            }
-
             Dispatch::<WidgetStore>::new().reduce_mut(|s| {
+                s.enable(Widget::WeatherCurrent);
+                s.enable(Widget::WeatherForecast(0));
+                s.enable(Widget::WeatherForecast(1));
+                s.enable(Widget::WeatherHumidity);
+
                 if let Some(_) = precipitation_change(&weather) {
                     s.enable(Widget::WeatherPrecipitation);
                 } else {
                     s.disable(Widget::WeatherPrecipitation);
                 }
             });
-
             s.weather = weather;
-            s.ready = true;
         }),
         Message::TaskReminders(_) => error!("unimplemented"),
         Message::CalendarReminders(_) => error!("unimplemented"),
         Message::Alerts(_) => error!("unimplemented"),
-        Message::Sun(_) => error!("unimplemented"),
+        Message::Sun(sun) => Dispatch::<WeatherStore>::new().reduce_mut(|s| {
+            Dispatch::<WidgetStore>::new().reduce_mut(|s| {
+                if sun_change(&sun) {
+                    s.enable(Widget::Sun);
+                } else {
+                    s.disable(Widget::Sun);
+                }
+            });
+            s.sun = sun;
+        }),
         Message::DisplayStateChange(state) => {
             Dispatch::<WidgetStore>::new().reduce_mut(|s| {
                 s.display = match state {

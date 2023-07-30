@@ -331,6 +331,7 @@ dependencies = [
  "js-sys",
  "log",
  "stores",
+ "time",
  "wasm-bindgen",
  "web-sys",
  "yew",
@@ -1687,6 +1688,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "sorted-vec"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0047b8207660638866f228b4b4147e98cc8efb190a70cd63d5cb899a4a539a8"
+
+[[package]]
 name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1697,6 +1704,7 @@ name = "stores"
 version = "0.1.0"
 dependencies = [
  "dto",
+ "sorted-vec",
  "yewdux",
 ]
 

@@ -92,8 +92,9 @@ pub struct Alert {
     pub persist: bool,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Sun {
+    pub rising: bool,
     pub rise: String,
     pub set: String,
 }

@@ -1,23 +1,26 @@
-use dto::Weather;
+use dto::{Sun, Weather};
+use sorted_vec::SortedSet;
 use yewdux::prelude::*;
 
 #[derive(Clone, PartialEq, Store, Default)]
 pub struct WeatherStore {
     pub weather: Weather,
-    pub ready: bool,
+    pub sun: Sun,
 }
 
-#[derive(Clone, PartialEq)]
+/// Ordering here determines the display order in the frontend carousel.
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Widget {
     WeatherCurrent,
     WeatherForecast(u8),
     WeatherHumidity,
     WeatherPrecipitation,
+    Sun,
 }
 
 #[derive(Clone, PartialEq, Store, Default)]
 pub struct WidgetStore {
-    enabled: Vec<Widget>,
+    enabled: SortedSet<Widget>,
     current: usize,
     pub display: bool,
     pub opacity: u8,
@@ -40,15 +43,13 @@ impl WidgetStore {
     }
 
     pub fn enable(&mut self, widget: Widget) {
-        self.enabled.push(widget)
+        if self.enabled.contains(&widget) {
+            return;
+        }
+        self.enabled.push(widget);
     }
 
     pub fn disable(&mut self, widget: Widget) {
-        self.enabled = self
-            .enabled
-            .iter()
-            .filter(|w| *w != &widget)
-            .cloned()
-            .collect();
+        self.enabled.remove_item(&widget);
     }
 }
