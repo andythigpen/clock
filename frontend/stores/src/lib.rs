@@ -31,6 +31,9 @@ impl WidgetStore {
         if self.enabled.is_empty() {
             return None;
         }
+        if self.current >= self.enabled.len() {
+            return None;
+        }
         Some(self.enabled[self.current].clone())
     }
 
@@ -51,5 +54,8 @@ impl WidgetStore {
 
     pub fn disable(&mut self, widget: Widget) {
         self.enabled.remove_item(&widget);
+        if self.current >= self.enabled.len() {
+            self.current = 0;
+        }
     }
 }
