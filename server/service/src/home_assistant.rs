@@ -23,6 +23,7 @@ struct WeatherEntityForecast {
 #[derive(Deserialize, Debug)]
 struct WeatherEntityAttributes {
     temperature: u8,
+    #[serde(default)]
     humidity: u8,
     forecast: Vec<WeatherEntityForecast>,
 }
