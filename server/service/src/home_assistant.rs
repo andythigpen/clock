@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::env;
 use std::time::Duration;
 
@@ -25,7 +26,6 @@ struct WeatherEntityAttributes {
     temperature: u8,
     #[serde(default)]
     humidity: u8,
-    forecast: Vec<WeatherEntityForecast>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -67,10 +67,35 @@ pub async fn fetch_entity(entity_id: &str) -> Result<Value> {
     }
 }
 
+async fn fetch_forecast(entity_id: &str) -> Result<Vec<WeatherEntityForecast>> {
+    let client = reqwest::Client::new();
+    let base_url = env::var("HA_URL").unwrap();
+    let token = env::var("HA_TOKEN").unwrap();
+    let mut body = HashMap::new();
+    body.insert("entity_id", entity_id);
+    body.insert("type", "hourly");
+    let response = client
+        .post(format!("{base_url}/api/services/weather/get_forecasts"))
+        .header(AUTHORIZATION, format!("Bearer {token}"))
+        .json(&body)
+        .send()
+        .await?;
+    match response.status() {
+        StatusCode::OK => {
+            let json = response.json().await?;
+            Ok(json)
+        }
+        e @ _ => {
+            error!("unexpected response: {e:?}");
+            Err(anyhow!(e))
+        }
+    }
+}
+
 async fn fetch_weather(entity_id: &str) -> Result<Message> {
     let json = fetch_entity(&entity_id).await?;
     let entity: WeatherEntity = serde_json::from_value(json)?;
-    let entity_forecast = entity.attributes.forecast;
+    let entity_forecast = fetch_forecast(&entity_id).await?;
 
     let mut forecasts = vec![];
     for hour in entity_forecast {
